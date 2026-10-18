@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bangkok Urban Air Mobility · แพลตฟอร์มข้อมูลสัมปทานน่านฟ้าและเวอร์ติพอร์ต</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F4F6F8;--pn:#fff;--fg:#0F172A;--mut:#64748B;--ac:#1E3A5F;--ln:#E2E8F0;--ok:#047857;--wn:#B45309}
+html,body{height:100%;background:var(--bg);color:var(--fg);font-family:Inter,'Noto Sans Thai',system-ui,sans-serif;font-size:13px;overflow:hidden}
+body{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+#shell{display:grid;height:100%;grid-template-columns:320px minmax(0,1fr) 370px;grid-template-rows:56px minmax(0,1fr);grid-template-areas:"h h h" "l c r"}
+header{grid-area:h;display:flex;align-items:center;gap:20px;padding:0 20px;background:var(--ac);color:#fff;min-width:0}
+.brand{font-weight:600;white-space:nowrap}.brand small{display:block;font-weight:400;font-size:10px;opacity:.7;letter-spacing:.08em}
+.kpi{margin-left:auto;display:flex;gap:28px}.kpi div{white-space:nowrap;text-align:right}.kpi small{display:block;font-size:10px;opacity:.7}.kpi b{font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
+.ibtn{display:none;width:36px;height:36px;border:1px solid rgba(255,255,255,.35);border-radius:6px;align-items:center;justify-content:center}
+.ibtn svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.6}
+aside{background:var(--pn);overflow-y:auto;min-height:0}
+#left{grid-area:l;border-right:1px solid var(--ln);padding:16px}#right{grid-area:r;border-left:1px solid var(--ln);padding:18px}
+#view{grid-area:c;position:relative;min-width:0;min-height:0;background:#e5e9ee;isolation:isolate}
+#map{position:absolute;inset:0}#map canvas{outline:none}#gate{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px}#gate .box{max-width:420px;width:100%;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:24px;line-height:1.7}#gate input{width:100%;margin:12px 0 14px;padding:10px;border:1px solid var(--ln);border-radius:6px;font:inherit}#attr{position:absolute;right:6px;bottom:4px;font-size:10px;color:#475569;background:rgba(255,255,255,.8);padding:1px 6px;border-radius:3px;pointer-events:none;z-index:1}
+#msg{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--mut);line-height:1.7;z-index:2}
+h3{font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--mut);margin:20px 0 8px}h3:first-child{margin-top:0}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ln);border-radius:6px;overflow:hidden}.seg button{padding:8px;font-size:12px}.seg .on{background:var(--ac);color:#fff}
+.item{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;padding:10px;border:1px solid var(--ln);border-radius:6px;margin-bottom:6px}
+.item:hover{background:#F8FAFC}.item.on{border-color:var(--ac);background:#EEF3F9}
+.item i{width:10px;height:10px;border-radius:50%;flex:none;margin-top:4px}.item b{display:block;font-weight:500}.item small{color:var(--mut)}
+.tg{display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer;user-select:none}.tg i{width:18px;height:4px;border-radius:2px}.tg span{flex:1}.tg input{accent-color:var(--ac)}
+.title{font-size:17px;font-weight:600;line-height:1.35}.sub{color:var(--mut);margin-top:2px}
+.chip{display:inline-block;margin-top:8px;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:500;background:#ECFDF5;color:var(--ok)}.chip.w{background:#FFFBEB;color:var(--wn)}
+.kg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.k{border:1px solid var(--ln);border-radius:6px;padding:10px}.k small{display:block;color:var(--mut);font-size:11px}.k b{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--ln)}.row span{color:var(--mut)}.row b{font-weight:500;text-align:right;font-variant-numeric:tabular-nums}
+.sl{margin:10px 0}.sl label{display:flex;justify-content:space-between;gap:8px;color:var(--mut)}.sl b{color:var(--fg);font-weight:500;white-space:nowrap}.sl input{width:100%;accent-color:var(--ac)}
+.res{border:1px solid var(--ac);border-radius:6px;padding:4px 12px;margin-top:10px}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.pbtn{background:var(--ac);color:#fff;border-radius:6px;padding:9px 14px;font-weight:500}.sbtn{border:1px solid var(--ln);border-radius:6px;padding:9px 14px}
+.src{margin-top:16px;padding:12px;border:1px solid var(--ln);border-radius:6px;background:#F8FAFC;line-height:1.65;font-size:12px}.src b{display:block;margin-bottom:4px}.src li{margin-left:16px}
+.note{margin-top:14px;color:var(--mut);font-size:11px;line-height:1.6}
+#backdrop{display:none}
+
+aside{scrollbar-width:none}aside::-webkit-scrollbar{display:none}
+.tabs{margin-bottom:14px}.item.cp{padding:7px 10px;margin-bottom:4px}.tabs button{padding:9px 4px}
+.st{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ln)}.st span{color:var(--mut);flex:1}.st div{display:flex;align-items:center;gap:8px}
+.st button{width:32px;height:32px;border:1px solid var(--ln);border-radius:6px;font-size:17px;line-height:1}.st button:active{background:#EEF3F9}.st b{min-width:64px;text-align:center;font-variant-numeric:tabular-nums;font-weight:500}
+.outb{border:1px solid rgba(255,255,255,.4);border-radius:6px;padding:6px 10px;font-size:12px;color:#fff;white-space:nowrap}
+#wm{position:absolute;inset:0;z-index:2;pointer-events:none}
+#login{position:fixed;inset:0;z-index:100;display:grid;grid-template-columns:1.15fr 1fr;background:#fff;padding-top:env(safe-area-inset-top,0px)}
+.lb{background:var(--ac);color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:space-between}
+.lb h1{font-size:30px;line-height:1.3;font-weight:600;margin-top:12px}.lb small{letter-spacing:.14em;opacity:.7;font-size:11px}
+.lb ul{list-style:none;line-height:2.1;opacity:.92}.lb li::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#fff;margin-right:12px;vertical-align:middle}
+.lf{display:flex;flex-direction:column;justify-content:center;padding:48px;max-width:460px;width:100%;margin:0 auto}
+.lf h2{font-size:22px;font-weight:600}.lf p{color:var(--mut);margin:6px 0 22px}.lf label{display:block;font-size:12px;color:var(--mut);margin:12px 0 4px}
+.lf input{width:100%;padding:12px;border:1px solid var(--ln);border-radius:6px;font:inherit}.lf input:focus{outline:2px solid var(--ac);outline-offset:-1px}
+.lf .pbtn{width:100%;margin-top:18px;padding:12px}.lf .er{color:#B91C1C;min-height:20px;margin-top:10px;font-size:12px}.lf .ft{color:var(--mut);font-size:11px;margin-top:24px;line-height:1.7}
+@media (max-width:1023px){#login{grid-template-columns:1fr;grid-template-rows:auto 1fr}.lb{padding:24px}.lb h1{font-size:20px}.lb ul{display:none}.lf{padding:24px}}
+
+#plan{display:none;position:fixed;left:0;right:0;top:calc(56px + env(safe-area-inset-top,0px));bottom:env(safe-area-inset-bottom,0px);z-index:60;background:var(--bg);flex-direction:column}
+#plan.on{display:flex}
+.ptabs{display:grid;grid-template-columns:repeat(4,1fr) auto;background:#fff;border-bottom:1px solid var(--ln)}
+.ptabs button{padding:14px 6px;font-size:13px;border-bottom:3px solid transparent;color:var(--mut)}.ptabs .on{color:var(--ac);border-color:var(--ac);font-weight:600}.ptabs .cl{padding:14px 18px;color:var(--fg);border-left:1px solid var(--ln)}
+.pbody{flex:1;overflow:auto;scrollbar-width:none;padding:18px}.pbody::-webkit-scrollbar{display:none}.pbody[hidden]{display:none}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.pc{background:#fff;border:1px solid var(--ln);border-radius:8px;padding:16px;line-height:1.65}
+.pc h4{font-size:14px;margin-bottom:4px}.pc small{color:var(--mut);display:block;margin-bottom:6px}
+.pc .nm{width:26px;height:26px;border-radius:50%;background:var(--ac);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-right:8px;vertical-align:middle}
+.pc ol{margin:8px 0 0 18px}.pc li{margin-bottom:4px}.pc p{margin-top:6px}.pc p span{color:var(--mut)}
+.big{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+.gate{margin-top:10px;padding:10px;background:#F8FAFC;border:1px dashed #94A3B8;border-radius:6px;font-size:12px}
+.pfoot{margin-top:14px;color:var(--mut);font-size:11px;line-height:1.7}.ph2{font-size:14px;font-weight:600;margin:2px 0 12px}
+@media (max-width:640px){.brand{display:none}.ptabs button{font-size:11px;padding:12px 2px}}
+
+.ic{width:42px;height:42px;border-radius:10px;background:#EEF3F9;color:var(--ac);display:flex;align-items:center;justify-content:center;flex:none}
+.ch{display:flex;align-items:center;gap:12px;margin-bottom:8px}.ch h4{margin:0}
+.ok{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:99px;background:#ECFDF5;color:var(--ok);font-size:12px}
+.vz{background:#fff;border:1px solid var(--ln);border-radius:8px;padding:14px;margin-bottom:12px}.vz svg{width:100%;height:auto;display:block}.vz svg text{font-family:inherit}
+.lg{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:12px;color:var(--mut)}.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.sb{display:grid;grid-template-columns:70px 1fr 100px;align-items:center;gap:10px;margin:10px 0;font-size:12px}.sb b{text-align:right;font-variant-numeric:tabular-nums}
+.bw{background:#F1F5F9;border-radius:6px;height:26px;overflow:hidden}.bar{display:flex;height:100%}.bar i{display:block;min-width:2px}
+.dn{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.dn svg{width:170px;height:170px;flex:none}
+.fl{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.fs{flex:1;min-width:120px;background:#F8FAFC;border:1px solid var(--ln);border-radius:8px;padding:10px;font-size:12px;position:relative}
+.fs b{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--ac);color:#fff;align-items:center;justify-content:center;font-size:11px;margin-bottom:6px}
+.fs::after{content:"›";position:absolute;right:-9px;top:50%;margin-top:-10px;color:var(--mut);font-size:18px;z-index:1}.fs:last-child::after{display:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.chips span{padding:4px 10px;border:1px solid var(--ln);border-radius:99px;font-size:12px;background:#fff}
+.lang{display:flex;border:1px solid rgba(255,255,255,.45);border-radius:6px;overflow:hidden}.lang button{padding:6px 9px;font-size:12px;color:#fff}.lang button.on{background:#fff;color:var(--ac);font-weight:600}
+.lgl{align-self:flex-end;border-color:var(--ln);margin-bottom:12px}.lgl button{color:var(--fg)}.lgl button.on{background:var(--ac);color:#fff}
+@media (max-width:1023px){
+ #shell{grid-template-columns:minmax(0,1fr);grid-template-areas:"h" "c"}
+ .ibtn{display:flex}.kpi{gap:12px}.kpi .hm{display:none}.brand small{display:none}header{gap:10px;padding:0 12px}
+ aside{position:fixed;top:calc(56px + env(safe-area-inset-top,0px));bottom:env(safe-area-inset-bottom,0px);width:min(88vw,370px);z-index:30;transition:transform .25s;box-shadow:0 0 30px rgba(0,0,0,.25)}
+ #left{left:0;transform:translateX(-105%)}#right{right:0;transform:translateX(105%)}
+ body.oL #left,body.oR #right{transform:none}
+ #backdrop{position:fixed;inset:0;z-index:20;background:rgba(15,23,42,.4)}body.oL #backdrop,body.oR #backdrop{display:block}
+}
+@media print{header,#left,#view,#backdrop{display:none!important}#shell{display:block}aside{position:static;transform:none!important;width:auto;overflow:visible;border:0}.acts{display:none}body,html{overflow:visible;height:auto}}
+</style>
+</head>
+<body>
+<div id="shell">
+ <header>
+  <button class="ibtn" id="bL" aria-label="รายการสินทรัพย์"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
+  <div class="brand">Bangkok Urban Air Mobility<small>แพลตฟอร์มข้อมูลสัมปทานน่านฟ้าและเวอร์ติพอร์ต · v14</small></div>
+  <div class="kpi">
+   <div class="hm"><small>ผู้ใช้งาน</small><b id="uName">–</b></div>
+   <div class="hm"><small>สินทรัพย์เปิดรับข้อเสนอ</small><b id="kOpen">0</b></div>
+   <div><small>รายได้ค่าผ่านทางรวม (ต่อปี)</small><b id="kArr">–</b></div>
+  </div>
+  <div class="lang"><button data-l="th" class="on">TH</button><button data-l="en">EN</button></div>
+  <button class="outb" id="planBtn">แผนโครงการ</button>
+  <button class="outb" id="out">ออกจากระบบ</button>
+  <button class="ibtn" id="bR" aria-label="รายละเอียดสินทรัพย์"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M14 4v16"/></svg></button>
+ </header>
+ <aside id="left">
+  <div class="seg tabs" id="lt" style="grid-template-columns:1fr 1fr 1fr"><button data-t="lA" class="on">จุด 1–5</button><button data-t="lR">จุด 6–15</button><button data-t="lB">มุมมอง</button></div>
+  <div id="lA" class="tp"><div id="list"></div></div>
+  <div id="lR" class="tp" hidden><div id="listR"></div></div>
+  <div id="lB" class="tp" hidden>
+   <h3>มุมมองแผนที่</h3>
+   <div class="seg" id="vw"><button data-v="3" class="on">3D เอียง</button><button data-v="2">2D มุมบน</button></div>
+   <h3>โฟกัสย่าน</h3>
+   <div class="seg" style="grid-template-columns:1fr 1fr 1fr" id="dist"></div>
+   <h3>ชั้นข้อมูลบนแผนที่</h3><div id="layers"></div>
+  </div>
+ </aside>
+ <main id="view"><div id="map"></div><div id="gate"><div class="box"><div class="title">เชื่อมต่อ Longdo Map</div>
+   <p class="sub">วาง API key ของ Longdo Map ระบบจะเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น ถ้าไม่มีหรือใช้ไม่ได้ ระบบจะใช้แผนที่สำรองให้อัตโนมัติ</p>
+   <input id="key" placeholder="วาง Longdo Map API key" autocomplete="off">
+   <div style="display:flex;gap:8px"><button class="pbtn" id="go">เริ่มใช้งาน</button><button class="sbtn" id="skip">ข้าม (ใช้แผนที่สำรอง)</button></div></div></div><div id="msg"></div><div id="wm"></div><div id="attr">© OpenStreetMap contributors © CARTO</div></main>
+ <aside id="right">
+  <div class="seg tabs" id="rt" style="grid-template-columns:1fr 1fr 1fr"><button data-t="rA" class="on">ภาพรวม</button><button data-t="rB">การเงิน</button><button data-t="rC">ที่มาข้อมูล</button></div>
+  <div id="rA" class="tp"><div id="detail"></div><div id="gmap"></div></div>
+  <div id="rB" class="tp" hidden><div id="model"></div><div id="res"></div><div class="acts"><button class="pbtn" id="csv">ส่งออก CSV</button><button class="sbtn" id="prt">พิมพ์รายงาน</button></div></div>
+  <div id="rC" class="tp" hidden><div class="src" style="margin-top:0"><b>ที่มาและความน่าเชื่อถือของตัวเลข</b>
+   <ul><li>รายได้ต่อวัน = ความจุ × ชั่วโมงให้บริการ × อัตราใช้งาน × ค่าธรรมเนียมต่อเที่ยว</li>
+   <li>ความจุ ค่าธรรมเนียม เงินลงทุน และมูลค่าสิทธิ์น่านฟ้า เป็นสมมติฐานเบื้องต้น ยังไม่ผ่านการศึกษาความเป็นไปได้</li>
+   <li>แผนที่และอาคารสูงเป็นข้อมูลจริงจากผู้ให้บริการแผนที่และ OpenStreetMap</li></ul></div>
+   <p class="note">เส้นทางน่านฟ้าเป็นแนวสมมติ ไม่ใช่เส้นทางที่ได้รับอนุญาตจากหน่วยงานกำกับดูแล และเอกสารนี้ไม่ใช่เอกสารประกวดราคาอย่างเป็นทางการ ก่อนใช้ยื่นข้อเสนอจริงควรแทนด้วยข้อมูลจากการศึกษาของโครงการ</p></div>
+ </aside>
+</div>
+<div id="login">
+ <div class="lb"><div><small>BANGKOK URBAN AIR MOBILITY</small><h1>ระบบข้อมูลสัมปทานน่านฟ้า<br>และเวอร์ติพอร์ตกรุงเทพมหานคร</h1></div>
+  <ul><li>แผนที่สามมิติ ย่านสาทร สีลม และสุขุมวิท</li><li>แบบจำลองผลตอบแทนและค่าสัมปทานเสนอเริ่มต้น</li><li>ข้อมูลสำหรับผู้เสนอราคา เข้าถึงเฉพาะผู้ได้รับสิทธิ์</li></ul></div>
+ <div class="lf" id="lf"><div class="lang lgl"><button data-l="th" class="on">TH</button><button data-l="en">EN</button></div><h2>เข้าสู่ระบบ</h2><p>สำหรับผู้ได้รับเชิญเข้าชมข้อมูลโครงการ</p>
+  <label for="u">ชื่อผู้ใช้</label><input id="u" autocapitalize="none" spellcheck="false">
+  <label for="pw">รหัสผ่าน</label><input id="pw" type="password">
+  <div class="er" id="er"></div><button class="pbtn" type="button" id="lgo">เข้าสู่ระบบ</button>
+  <div class="ft">ระบบนี้เป็นเวอร์ชันสาธิต ข้อมูลทั้งหมดเป็นแบบจำลอง เอกสารและข้อมูลในระบบเป็นความลับ ห้ามเผยแพร่หรือทำซ้ำโดยไม่ได้รับอนุญาต</div></div>
+</div>
+<div id="plan">
+ <div class="ptabs" id="ptabs"><button data-p="p1" class="on">6 แนวคิดหลัก</button><button data-p="p2">ระยะและงบประมาณ</button><button data-p="p3">รายได้และการชำระเงิน</button><button data-p="p4">วิธีใช้งาน</button><button class="cl" id="pcl">ปิด ✕</button></div>
+ <div class="pbody" id="p1"></div><div class="pbody" id="p2" hidden></div><div class="pbody" id="p3" hidden></div><div class="pbody" id="p4" hidden></div>
+</div>
+<div id="backdrop"></div>
+<script src="https://cdn.jsdelivr.net/npm/deck.gl@8.9.35/dist.min.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i)};
+var fm=function(n,d){return Number(n).toLocaleString('th-TH',{maximumFractionDigits:d||0,minimumFractionDigits:d||0})};
+var TC={t1:[14,116,144],t2:[29,78,216],t3:[124,58,237],r:[190,18,60]};
+var rgb=function(c,a){return 'rgba('+c[0]+','+c[1]+','+c[2]+','+(a||1)+')'};
+/* ---------- ข้อมูล (สมมติฐานเบื้องต้น) ---------- */
+var NP=360,CHAIN=[[100.5282, 13.723], [100.54, 13.7192], [100.5698, 13.7311], [100.5783, 13.7243], [100.5851, 13.7197], [100.6085, 13.6875], [100.6078, 13.6683], [100.6451, 13.6677], [100.693, 13.635], [100.603, 13.6075], [100.599, 13.63], [100.52661, 13.62385], [100.4918, 13.62308], [100.3991, 13.6592], [100.4847, 13.6772]];
+var A=[
+ {id:'BKK-VP-01',t:'vp',n:'คิง เพาเวอร์ มหานคร (Sathorn Hub)',d:'สาทร',p:[100.5282,13.7230],h:314,fee:5200,cap:48,air:112000,op:'Sansiri Sky',st:'เปิดรับข้อเสนอ',capex:420},
+ {id:'BKK-VP-02',t:'vp',n:'เอ็มไพร์ ทาวเวอร์',d:'สาทร',p:[100.5400,13.7192],h:250,fee:5400,cap:36,air:96000,op:'CPN Air Hubs',st:'เจรจาผู้ร่วมทุน',capex:340},
+ {id:'BKK-VP-03',t:'vp',n:'EmDistrict (พร้อมพงษ์)',d:'สุขุมวิท',p:[100.5698,13.7311],h:150,fee:5350,cap:42,air:124000,op:'CPN Air Hubs',st:'เปิดรับข้อเสนอ',capex:380},
+ {id:'BKK-VP-04',t:'vp',n:'ทองหล่อ High-Altitude Vertiport',d:'สุขุมวิท',p:[100.5783,13.7243],h:120,fee:6050,cap:34,air:131000,op:'Ananda Vertiports',st:'ศึกษาความเป็นไปได้',capex:310},
+ {id:'BKK-VP-05',t:'vp',n:'เอกมัย Logistics & Air-Dock Center',d:'สุขุมวิท',p:[100.5851,13.7197],h:100,fee:4780,cap:60,air:89000,op:'AP Aero Mobility',st:'เปิดรับข้อเสนอ',capex:290},
+ {id:"BKK-AC-T1",t:'cor',tier:"t1",alt:120,n:"ช่องทางน่านฟ้าชั้น 1 · สัญจรท้องถิ่น (จุด 1–15)",d:'สาทร–สุขุมวิท–พระประแดง–ทุ่งครุ–บางบอน',off:-0.0035,fee:900,cap:180,op:"Sansiri Sky",st:"เจรจาผู้ร่วมทุน",capex:2600,pts:CHAIN},
+ {id:"BKK-AC-T2",t:'cor',tier:"t2",alt:220,n:"ช่องทางน่านฟ้าชั้น 2 · ทางด่วน eVTOL (จุด 1–15)",d:'สาทร–สุขุมวิท–พระประแดง–ทุ่งครุ–บางบอน',off:0,fee:1600,cap:260,op:"CPN Air Hubs",st:"เปิดรับข้อเสนอ",capex:3800,pts:CHAIN},
+ {id:"BKK-AC-T3",t:'cor',tier:"t3",alt:350,n:"ช่องทางน่านฟ้าชั้น 3 · ขนส่งสินค้า (จุด 1–15)",d:'สาทร–สุขุมวิท–พระประแดง–ทุ่งครุ–บางบอน',off:0.0035,fee:2100,cap:90,op:"Ananda Vertiports",st:"ศึกษาความเป็นไปได้",capex:2900,pts:CHAIN},
+ {id:"BKK-VP-06",t:'vp',g:'r',n:"True Digital Park (สุขุมวิท 101)",d:"พระโขนง",p:[100.6085, 13.6875],h:100,fee:5000,cap:30,air:118000,op:"Sansiri Sky",st:"เปิดรับข้อเสนอ",capex:250},
+ {id:"BKK-VP-07",t:'vp',g:'r',n:"BITEC บางนา",d:"บางนา",p:[100.6078, 13.6683],h:60,fee:4900,cap:36,air:102000,op:"CPN Air Hubs",st:"เจรจาผู้ร่วมทุน",capex:240},
+ {id:"BKK-VP-08",t:'vp',g:'r',n:"อาคารสถานีศรีเอี่ยม (MRT สายสีเหลือง)",d:"บางนา",p:[100.6451, 13.6677],h:90,fee:4700,cap:32,air:86000,op:"Ananda Vertiports",st:"เปิดรับข้อเสนอ",capex:230},
+ {id:"BKK-VP-09",t:'vp',g:'r',n:"บ้านคลองบางแก้ว บางพลี",d:"บางพลี",p:[100.693, 13.635],h:70,fee:5600,cap:40,air:62000,op:"AP Aero Mobility",st:"ศึกษาความเป็นไปได้",capex:260},
+ {id:"BKK-VP-10",t:'vp',g:'r',n:"บางเมือง สมุทรปราการ",d:"สมุทรปราการ",p:[100.603, 13.6075],h:70,fee:4600,cap:30,air:74000,op:"Ananda Vertiports",st:"ศึกษาความเป็นไปได้",capex:220},
+ {id:"BKK-VP-11",t:'vp',g:'r',n:"สุขุมวิท 117",d:"สมุทรปราการ",p:[100.599, 13.63],h:80,fee:4800,cap:32,air:80000,op:"CPN Air Hubs",st:"เจรจาผู้ร่วมทุน",capex:235},
+ {id:"BKK-VP-12",t:'vp',g:'r',n:"บางครุ (ถนนกาญจนาภิเษก)",d:"พระประแดง",p:[100.52661, 13.62385],h:70,fee:4700,cap:30,air:92000,op:"Sansiri Sky",st:"เปิดรับข้อเสนอ",capex:225},
+ {id:"BKK-VP-13",t:'vp',g:'r',n:"ทุ่งครุ (ถนนกาญจนาภิเษก)",d:"ทุ่งครุ",p:[100.4918, 13.62308],h:60,fee:4500,cap:28,air:70000,op:"AP Aero Mobility",st:"ศึกษาความเป็นไปได้",capex:210},
+ {id:"BKK-VP-14",t:'vp',g:'r',n:"บางบอน",d:"บางบอน",p:[100.3991, 13.6592],h:60,fee:4400,cap:26,air:58000,op:"Ananda Vertiports",st:"ศึกษาความเป็นไปได้",capex:205},
+ {id:"BKK-VP-15",t:'vp',g:'r',n:"จอมทอง",d:"จอมทอง",p:[100.4847, 13.6772],h:90,fee:4900,cap:34,air:96000,op:"CPN Air Hubs",st:"เปิดรับข้อเสนอ",capex:245}];
+var CF={'BKK-VP-01':[24,1500],'BKK-VP-02':[18,1400],'BKK-VP-03':[20,1450],'BKK-VP-04':[16,1600],'BKK-VP-05':[30,1100],'BKK-VP-06':[15,1300],'BKK-VP-07':[18,1250],'BKK-VP-08':[16,1200],'BKK-VP-09':[20,1100],'BKK-VP-10':[15,1150],'BKK-VP-11':[16,1200],'BKK-VP-12':[15,1250],'BKK-VP-13':[14,1150],'BKK-VP-14':[13,1100],'BKK-VP-15':[17,1300],'BKK-AC-T1':[60,700],'BKK-AC-T2':[90,1100],'BKK-AC-T3':[30,1500]};
+A.forEach(function(a){var c=CF[a.id];if(c){a.cap=c[0];a.fee=c[1]}});
+var BASE=[[100.5135,13.7189],[100.5230,13.7215],[100.5282,13.7230],[100.5340,13.7205],[100.5400,13.7192],[100.5500,13.7245],[100.5640,13.7305],[100.5698,13.7311],[100.5783,13.7243],[100.5851,13.7197]];
+var DIST={'สาทร':{c:[100.5330,13.7210],z:15.2,b:-25},'สุขุมวิท':{c:[100.5740,13.7270],z:14.6,b:-30},'ภาพรวม':{c:[100.5450,13.7240],z:12.7,b:-20},'ทั้งเส้นทาง':{c:[100.55,13.67],z:10.7,b:0,p:35}};
+function offs(pts,d){return pts.map(function(p,i){var a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)],c=Math.cos(p[1]*Math.PI/180),dx=(b[0]-a[0])*c,dy=b[1]-a[1],L=Math.hypot(dx,dy)||1;return[p[0]+(-dy/L)*d/c,p[1]+(dx/L)*d]})}
+function hav(a,b){var R=6371,r=Math.PI/180,dl=(b[1]-a[1])*r,dg=(b[0]-a[0])*r,x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin(dg/2)*Math.sin(dg/2);return 2*R*Math.asin(Math.sqrt(x))}
+function dense(pts,n){var cum=[0],i;for(i=1;i<pts.length;i++)cum.push(cum[i-1]+hav(pts[i-1],pts[i]));var L=cum[cum.length-1],out=[];
+ for(var k=0;k<n;k++){var d=L*k/(n-1),j=1;while(j<cum.length-1&&cum[j]<d)j++;var f=(d-cum[j-1])/((cum[j]-cum[j-1])||1);out.push([pts[j-1][0]+(pts[j][0]-pts[j-1][0])*f,pts[j-1][1]+(pts[j][1]-pts[j-1][1])*f])}
+ return{L:L,pts:out}}
+A.forEach(function(a){if(a.t==='cor'){var raw=offs(a.pts,a.off||0),dn=dense(raw,NP);a.km=dn.L;a.path=dn.pts.map(function(p){return[p[0],p[1],a.alt]});a.air=a.alt*410}});
+var VPN=0;A.forEach(function(a){if(a.t==='vp'){a.num=++VPN;var x=a.p[0],y=a.p[1],d=.00019;a.ring=[[x-d,y-d],[x+d,y-d],[x+d,y+d],[x-d,y+d]]}});
+/* ---------- แบบจำลองการเงิน ---------- */
+var M={hr:16,u:85,m:60,g:3,r:10,n:25};
+var SL=[['hr','ชั่วโมงให้บริการต่อวัน','ชม.',8,24,1],['u','อัตราการใช้งานเทียบกับกำลังรองรับ','%',40,100,1],['m','อัตรากำไร EBITDA','%',30,80,1],['g','การเติบโตของรายได้ต่อปี','%',0,8,.5],['r','อัตราคิดลด','%',6,14,.5],['n','อายุสัมปทาน','ปี',10,30,1]];
+SL.forEach(function(s){var d=document.createElement('div');d.className='st';
+ d.innerHTML='<span>'+s[1]+'</span><div><button type="button" aria-label="ลด">−</button><b id="v_'+s[0]+'"></b><button type="button" aria-label="เพิ่ม">+</button></div>';
+ var bs=d.querySelectorAll('button');
+ function ch(k){M[s[0]]=Math.min(s[4],Math.max(s[3],Math.round((M[s[0]]+k*s[5])*100)/100));calc();head();if(sel)renderDetail()}
+ bs[0].onclick=function(){ch(-1)};bs[1].onclick=function(){ch(1)};$('model').appendChild(d)});
+function toll(a){return a.cap*M.hr*M.u/100*a.fee}
+function flows(a){var rev=toll(a)*365/1e6,cf=[-a.capex];for(var t=1;t<=M.n;t++)cf.push(rev*M.m/100*Math.pow(1+M.g/100,t-1));return cf}
+function npv(cf,r){return cf.reduce(function(s,c,t){return s+c/Math.pow(1+r,t)},0)}
+function irr(cf){var lo=-.5,hi=1,m;for(var i=0;i<60;i++){m=(lo+hi)/2;npv(cf,m)>0?lo=m:hi=m}return m}
+function res(a){var cf=flows(a),N=npv(cf,M.r/100),pb=null,c=0;for(var t=1;t<cf.length;t++){c+=cf[t];if(c>=a.capex){pb=t-1+(a.capex-(c-cf[t]))/cf[t];break}}
+ return{npv:N,irr:irr(cf)*100,pb:pb,bid:Math.max(0,N*.25),yld:toll(a)*365*M.m/100/1e6/a.capex*100}}
+/* ---------- แผนที่ 3D ---------- */
+var dk,VS={longitude:100.545,latitude:13.724,zoom:12.7,pitch:55,bearing:-20,maxPitch:80,minZoom:10,maxZoom:19},BLD=[],sel=null,vis={t1:1,t2:1,t3:1,r:1,vp:1},T0=Date.now(),TRIPS=[];
+function msg(t){var m=$('msg');m.style.display='flex';m.textContent=t}
+A.forEach(function(a){if(a.t!=='cor')return;[0,.33,.66].forEach(function(sh){TRIPS.push({tier:a.tier,shift:sh*NP,path:a.path,ts:a.path.map(function(_,j){return j+sh*NP})})})});
+var LOOP=NP*1.66+30;
+function layers(){
+ var time=((Date.now()-T0)/1000*25)%LOOP,cors=A.filter(function(a){return a.t==='cor'&&vis[a.tier]}),vps=A.filter(function(a){return a.t==='vp'}),heads=[],sid=sel?sel.id:'';
+ TRIPS.forEach(function(t){if(!vis[t.tier])return;var i=Math.floor(time-t.shift);if(i>=0&&i<NP)heads.push({p:t.path[i],c:TC[t.tier]})});
+ var L=[new deck.TileLayer(tileProps()),new deck.PolygonLayer({id:'bld',data:BLD,extruded:true,getPolygon:function(d){return d.p},getElevation:function(d){return d.h},getFillColor:[243,246,250,255],getLineColor:[176,188,204,255],wireframe:true,material:{ambient:.6,diffuse:.55,shininess:8}}),
+  new deck.PathLayer({id:'cor',data:cors,getPath:function(a){return a.path},getColor:function(a){return TC[a.tier].concat(a.id===sid?190:80)},getWidth:function(a){return a.id===sid?70:38},widthUnits:'meters',widthMinPixels:3,billboard:true,capRounded:true,jointRounded:true,pickable:true,updateTriggers:{getColor:[sid],getWidth:[sid]}})];
+ ['t1','t2','t3','r'].forEach(function(k){L.push(new deck.TripsLayer({id:'trip'+k,data:TRIPS.filter(function(t){return t.tier===k}),getPath:function(t){return t.path},getTimestamps:function(t){return t.ts},getColor:TC[k],widthMinPixels:4,trailLength:26,currentTime:time,fadeTrail:true,capRounded:true,visible:!!vis[k]}))});
+ L.push(new deck.ScatterplotLayer({id:'heads',data:heads,getPosition:function(d){return d.p},getFillColor:function(d){return d.c.concat(255)},getLineColor:[255,255,255],stroked:true,lineWidthMinPixels:2,radiusUnits:'pixels',getRadius:6,visible:!!(vis.t1||vis.t2||vis.t3||vis.r)}),
+  new deck.PolygonLayer({id:'vpt',data:vps,extruded:true,getPolygon:function(v){return v.ring.map(function(c){return[c[0],c[1],0]})},getElevation:function(v){return v.h},getFillColor:function(v){return v.id===sid?[180,83,9,255]:[30,58,95,255]},getLineColor:[255,255,255,200],wireframe:true,pickable:true,visible:!!vis.vp,material:{ambient:.6,diffuse:.5,shininess:12},updateTriggers:{getFillColor:[sid]}}),
+  new deck.PolygonLayer({id:'vpa',data:vps,extruded:true,getPolygon:function(v){return v.ring.map(function(c){return[c[0],c[1],v.h]})},getElevation:40,getFillColor:function(v){return v.id===sid?[180,83,9,110]:[16,185,129,80]},getLineColor:[4,120,87,220],wireframe:true,pickable:true,visible:!!vis.vp,updateTriggers:{getFillColor:[sid]}}),
+  new deck.ScatterplotLayer({id:'vp',data:vps,getPosition:function(v){return[v.p[0],v.p[1],v.h+46]},getFillColor:function(v){return v.id===sid?[180,83,9,255]:[30,58,95,255]},getLineColor:[255,255,255],stroked:true,lineWidthMinPixels:2,radiusUnits:'pixels',getRadius:v=>v.id===sid?17:13,pickable:true,visible:!!vis.vp,updateTriggers:{getFillColor:[sid],getRadius:[sid]}}),
+  new deck.TextLayer({id:'num',data:vps,getPosition:function(v){return[v.p[0],v.p[1],v.h+46]},getText:function(v){return String(v.num)},getSize:12,getColor:[255,255,255],fontWeight:600,fontFamily:'Arial, sans-serif',characterSet:'0123456789',billboard:true,visible:!!vis.vp,pickable:false}));
+ return L}
+var KEY='',SRC='longdo',okc=0,badc=0;
+function setAttr(){$('attr').textContent=SRC==='longdo'?'© Longdo Map':'© OpenStreetMap contributors © CARTO (แผนที่สำรอง)'}
+function tileUrl(){return SRC==='longdo'?'https://ms.longdo.com/mmmap/tile.php?key='+encodeURIComponent(KEY||'demokeyfortestingonly')+'&proj=epsg3857&zoom={z}&x={x}&y={y}':'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'}
+function tileProps(){var tpl=tileUrl();return{id:'base_'+SRC,minZoom:0,maxZoom:19,tileSize:256,data:tpl,
+ getTileData:function(t){var i=t.index||t,u=tpl.replace('{z}',i.z).replace('{x}',i.x).replace('{y}',i.y);
+  return new Promise(function(res,rej){var im=new Image();im.crossOrigin='anonymous';im.onload=function(){res(im)};im.onerror=function(){rej(new Error('tile'))};im.src=u})},
+ onTileLoad:function(){okc++},
+ onTileError:function(){badc++;if(SRC==='longdo'&&okc===0&&badc>=4){SRC='carto';badc=0;setAttr()}
+  else if(SRC==='carto'&&okc===0&&badc>=6){$('attr').textContent='โหลดภาพแผนที่ไม่ได้ ลองเปิดไฟล์ด้วย Chrome หรือตรวจอินเทอร์เน็ต'}},
+ renderSubLayers:function(p){var b=p.tile.bbox;return new deck.BitmapLayer(p,{data:null,image:p.data,bounds:[b.west,b.south,b.east,b.north]})}}}
+function go(t){if(!dk)return;dk.setProps({viewState:Object.assign({},VS,t,{transitionDuration:1300,transitionInterpolator:new deck.FlyToInterpolator()})})}
+function loadBld(){
+ var bb='(13.705,100.50,13.745,100.60)',q='[out:json][timeout:25];(way["building"]["building:levels"~"^(1[2-9]|[2-9][0-9]|1[0-9][0-9])$"]'+bb+';way["building"]["height"~"^([4-9][0-9]|[1-9][0-9]{2})(\\.[0-9]+)?( m)?$"]'+bb+';);out geom 3000;';
+ fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(q)}).then(function(r){return r.json()}).then(function(j){
+  BLD=j.elements.filter(function(e){return e.geometry&&e.geometry.length>3}).map(function(e){var t=e.tags||{},h=parseFloat(t.height)||(parseFloat(t['building:levels'])||12)*3.4;return{p:e.geometry.map(function(g){return[g.lon,g.lat]}),h:h}})}).catch(function(){})}
+function initMap(){
+ var gl=null;try{var cv=document.createElement('canvas');gl=cv.getContext('webgl2')||cv.getContext('webgl')}catch(e){}
+ if(!gl){msg('หน้าต่างแสดงผลนี้ไม่รองรับ WebGL กรุณาเปิดไฟล์นี้ด้วยเบราว์เซอร์ Chrome');return}
+ if(!window.deck){msg('โหลดไลบรารีแผนที่ไม่สำเร็จ กรุณาต่ออินเทอร์เน็ตแล้วรีเฟรชหน้านี้');return}
+ try{
+  dk=new deck.Deck({parent:$('map'),viewState:VS,controller:{inertia:true},layers:layers(),
+   getCursor:function(s){return s.isHovering?'pointer':(s.isDragging?'grabbing':'grab')},
+   onViewStateChange:function(o){VS=o.viewState;dk.setProps({viewState:VS})},
+   onClick:function(i){if(i&&i.object&&i.object.id)select(i.object.id,true)}});
+  var last=0;(function tick(t){requestAnimationFrame(tick);if(t-last<33)return;last=t;dk.setProps({layers:layers()})})(0);
+  loadBld();
+ }catch(e){msg('เริ่มแผนที่ 3D ไม่สำเร็จ: '+(e&&e.message?e.message:e))}
+}
+function gmapRender(){var a=sel,ll=a.t==='vp'?[a.p[1],a.p[0]]:[a.path[100][1],a.path[100][0]];
+ $('gmap').innerHTML='<iframe title="Google Maps" loading="lazy" style="width:100%;height:150px;border:1px solid var(--ln);border-radius:6px;margin-top:14px" src="https://maps.google.com/maps?q='+ll[0]+','+ll[1]+'&z='+(a.t==='vp'?17:14)+'&hl=th&output=embed"></iframe>'
+ +'<a class="sbtn" style="display:block;text-align:center;margin-top:8px;text-decoration:none;color:inherit" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+ll[0]+','+ll[1]+'">เปิดตำแหน่งนี้ใน Google Maps</a>'}
+function select(id,fromMap){
+ sel=A.filter(function(a){return a.id===id})[0];renderList();renderDetail();calc();gmapRender();
+ if(dk&&!fromMap){if(sel.t==='vp')go({longitude:sel.p[0],latitude:sel.p[1],zoom:16,pitch:62,bearing:-25});else go({longitude:100.55,latitude:13.67,zoom:10.7,pitch:35,bearing:0})}
+ if(innerWidth<1024){document.body.classList.remove('oL');if(fromMap)document.body.classList.add('oR')}
+}
+/* ---------- UI ---------- */
+function renderList(){var h={c:'',r:''};A.forEach(function(a){var g=a.g==='r'?'r':'c';
+ var cp=(a.t==='vp'&&g==='r');h[g]+='<button class="item'+(cp?' cp':'')+(sel&&sel.id===a.id?' on':'')+'" data-id="'+a.id+'"><i style="background:'+(a.t==='vp'?'#1E3A5F':rgb(TC[a.tier]))+'"></i><span><b>'+(a.t==='vp'?a.num+'. ':'')+a.n+'</b>'+(cp?'':'<small>'+a.id+' · '+a.d+' · '+a.st+'</small>')+'</span></button>'});
+ [['list','c'],['listR','r']].forEach(function(x){var el=$(x[0]);el.innerHTML=h[x[1]];[].forEach.call(el.querySelectorAll('.item'),function(b){b.onclick=function(){select(b.getAttribute('data-id'),false)}})})}
+function renderDetail(){var a=sel,w=a.st!=='เปิดรับข้อเสนอ',r=res(a);
+ var h='<div class="sub">'+a.id+' · '+(a.t==='vp'?'เวอร์ติพอร์ต':'ช่องทางน่านฟ้า')+'</div><div class="title">'+a.n+'</div><span class="chip'+(w?' w':'')+'">'+a.st+'</span>';
+ h+='<div class="kg"><div class="k"><small>รายได้ค่าผ่านทางต่อวัน</small><b>฿'+fm(toll(a))+'</b></div><div class="k"><small>ผลตอบแทนสัมปทาน (EBITDA/ลงทุน)</small><b>'+fm(r.yld,1)+'% p.a.</b></div>'
+  +'<div class="k"><small>ความจุจุดจอด-ขึ้นลง</small><b>'+a.cap+' เที่ยว/ชม.</b></div><div class="k"><small>มูลค่าสิทธิ์น่านฟ้า (ประมาณ)</small><b>฿'+fm(a.air)+'/ลบ.ม.</b></div></div>';
+ h+='<div style="margin-top:10px"><div class="row"><span>ผู้ถือสัมปทาน</span><b>'+a.op+'</b></div><div class="row"><span>ย่านพื้นที่</span><b>'+a.d+'</b></div>'
+  +'<div class="row"><span>ค่าธรรมเนียมต่อเที่ยว</span><b>฿'+fm(a.fee)+'</b></div>'
+  +(a.t==='cor'?'<div class="row"><span>ระดับความสูงชั้นบิน</span><b>'+a.alt+' ม.</b></div><div class="row"><span>ความยาวเส้นทาง</span><b>'+fm(a.km,1)+' กม.</b></div>':'<div class="row"><span>ความสูงอาคาร (โดยประมาณ)</span><b>'+a.h+' ม.</b></div>')
+  +'<div class="row"><span>เงินลงทุนโครงการ (ประมาณ)</span><b>฿'+fm(a.capex)+' ล้าน</b></div></div>';
+ $('detail').innerHTML=h}
+function calc(){SL.forEach(function(s){$('v_'+s[0]).textContent=M[s[0]]+' '+s[2]});if(!sel)return;var r=res(sel);
+ $('res').innerHTML='<div class="res"><div class="row"><span>มูลค่าปัจจุบันสุทธิ (NPV)</span><b>฿'+fm(r.npv)+' ล้าน</b></div><div class="row"><span>อัตราผลตอบแทนโครงการ (IRR)</span><b>'+fm(r.irr,1)+'%</b></div>'
+  +'<div class="row"><span>ระยะเวลาคืนทุน</span><b>'+(r.pb?fm(r.pb,1)+' ปี':'เกินอายุสัมปทาน')+'</b></div><div class="row" style="border:0"><span>ค่าสัมปทานเสนอเริ่มต้น (25% ของ NPV)</span><b>฿'+fm(r.bid)+' ล้าน</b></div></div>'}
+function head(){var o=A.filter(function(a){return a.st==='เปิดรับข้อเสนอ'}).length,t=0;A.forEach(function(a){t+=toll(a)*365});
+ $('kOpen').textContent=o+' จาก '+A.length+' รายการ';$('kArr').textContent='฿'+fm(t/1e9,2)+' พันล้าน'}
+[['t1','ชั้น 1 · 120 ม. สัญจรท้องถิ่น',rgb(TC.t1)],['t2','ชั้น 2 · 220 ม. ทางด่วน eVTOL',rgb(TC.t2)],['t3','ชั้น 3 · 350 ม. ขนส่งสินค้า',rgb(TC.t3)],['vp','ตึกจำลองสัมปทาน + ปริมาตรสิทธิ์น่านฟ้า','#1E3A5F']].forEach(function(l){
+ var d=document.createElement('label');d.className='tg';d.innerHTML='<i style="background:'+l[2]+'"></i><span>'+l[1]+'</span><input type="checkbox" checked>';
+ d.querySelector('input').onchange=function(e){vis[l[0]]=e.target.checked?1:0};$('layers').appendChild(d)});
+Object.keys(DIST).forEach(function(k){var b=document.createElement('button');b.textContent=k;
+ b.onclick=function(){go({longitude:DIST[k].c[0],latitude:DIST[k].c[1],zoom:DIST[k].z,pitch:DIST[k].p!=null?DIST[k].p:58,bearing:DIST[k].b});document.body.classList.remove('oL')};$('dist').appendChild(b)});
+[].forEach.call($('vw').querySelectorAll('button'),function(b){b.onclick=function(){[].forEach.call($('vw').querySelectorAll('button'),function(x){x.className=''});b.className='on';
+ go({pitch:b.getAttribute('data-v')==='3'?58:0,bearing:b.getAttribute('data-v')==='3'?-20:0})}});
+$('csv').onclick=function(){var rows=[['รหัส','ชื่อ','ประเภท','ย่าน','สถานะ','ผู้ถือสัมปทาน','รายได้ค่าผ่านทางต่อวัน (บาท)','ความจุ (เที่ยว/ชม.)','เงินลงทุน (ล้านบาท)','NPV (ล้านบาท)','IRR (%)','ค่าสัมปทานเสนอเริ่มต้น (ล้านบาท)']];
+ A.forEach(function(a){var r=res(a);rows.push([a.id,a.n,a.t==='vp'?'เวอร์ติพอร์ต':'ช่องทางน่านฟ้า',a.d,a.st,a.op,Math.round(toll(a)),a.cap,a.capex,r.npv.toFixed(1),r.irr.toFixed(1),r.bid.toFixed(1)])});
+ rows=rows.map(function(r){return r.map(function(c){return typeof c==='string'?tr(c):c})});var csv='\ufeff'+rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+ var u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=u;a.download='bkk-air-concession-assets.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},500)};
+$('prt').onclick=function(){window.print()};
+$('bL').onclick=function(){document.body.classList.toggle('oL');document.body.classList.remove('oR')};
+$('bR').onclick=function(){document.body.classList.toggle('oR');document.body.classList.remove('oL')};
+$('backdrop').onclick=function(){document.body.classList.remove('oL','oR')};
+
+var ICO={roof:'<rect x="6" y="9" width="12" height="12"/><path d="M4 9h16M9 4h6v5H9zM9.5 13h2M13 13h2M9.5 17h2M13 17h2"/>',phase:'<path d="M3 20h5v-5h5v-5h5V5h3"/>',box:'<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',train:'<rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M8 21l2-4M16 21l-2-4"/>',river:'<path d="M3 8c3-3 6 3 9 0s6-3 9 0M3 14c3-3 6 3 9 0s6-3 9 0M3 20c3-3 6 3 9 0s6-3 9 0"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 4-7 8-7s8 2 8 7"/>',plane:'<path d="M2 13h20M12 5v14M7 9l5-4 5 4"/>',people:'<circle cx="9" cy="9" r="3"/><circle cx="17" cy="10" r="2.5"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M15 20c0-3 2-5 5-5"/>'};
+function ic(n){return '<div class="ic"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+ICO[n]+'</svg></div>'}
+function renderPlan(){
+ var VP=A.filter(function(a){return a.t==='vp'}),CO=A.filter(function(a){return a.t==='cor'}),cc=0,cr=0,PC=['#1E3A5F','#0E7490','#7C3AED'];
+ CO.forEach(function(a){cc+=a.capex;cr+=toll(a)*365/1e6});
+ function ck(i,j){var k=0;for(var x=i;x<j;x++)k+=hav(CHAIN[x],CHAIN[x+1]);return k}
+ var KM=[ck(0,4),ck(4,8),ck(8,14)],KT=KM[0]+KM[1]+KM[2];
+ /* ---- แท็บ 1 ---- */
+ var C=[['roof','สัมปทานจุดขึ้นลงบนดาดฟ้า','เจ้าของอาคารให้เช่าดาดฟ้าและแบ่งรายได้ตามสัญญา เส้นทางบินขออนุมัติกับ CAAT แยกต่างหาก','ทำได้ภายใต้กฎหมายปัจจุบัน'],
+  ['phase','แบ่ง 3 ระยะ มีด่านตัดสินใจ','ลงทุนระยะถัดไปเมื่อระยะก่อนผ่านเกณฑ์ที่ตกลงกัน','ผู้ลงทุนเสี่ยงน้อยลง ถอนตัวได้ทุกด่าน'],
+  ['box','เริ่มจากพัสดุ เวชภัณฑ์ ฉุกเฉิน','ใช้ชั้น 350 เมตรขนส่งสินค้าและช่วยเหลือฉุกเฉินก่อนรับผู้โดยสาร','ขออนุญาตง่าย สร้างสถิติความปลอดภัย'],
+  ['train','เชื่อมกับรถไฟฟ้า','วางจุดใกล้สถานี เช่น ศรีเอี่ยม ชำระผ่านพร้อมเพย์ในแอปเดียว','ใช้ง่าย สังคมยอมรับ'],
+  ['river','บินตามแม่น้ำและถนนใหญ่','วางเส้นเหนือแม่น้ำและถนนสายหลัก เลี่ยงบ้านพักอาศัย เปิดแผนที่เสียงให้ชุมชนดู','ลดเสียงและข้อร้องเรียน'],
+  ['clock','ประมูลช่วงเวลาบิน (slot)','ผู้ให้บริการประมูลสิทธิ์ใช้ช่องเวลาและเส้นทางรายไตรมาส','รายได้ล่วงหน้า โปร่งใส วัดผลได้']];
+ var h='<div class="pgrid">';C.forEach(function(c,i){h+='<div class="pc"><div class="ch">'+ic(c[0])+'<h4>'+(i+1)+'. '+c[1]+'</h4></div><p>'+c[2]+'</p><span class="ok">✓ '+c[3]+'</span></div>'});
+ $('p1').innerHTML=h+'</div><p class="pfoot">เป็นข้อเสนอเชิงนโยบาย ก่อนนำไปใช้จริงควรตรวจสอบกฎหมายและข้อกำหนดของ CAAT กับที่ปรึกษากฎหมายด้านการบิน</p>';
+ /* ---- แท็บ 2 ---- */
+ var PH=[['ระยะที่ 1 · จุด 1–5 ใจกลางเมือง','2027–2029',1,5,'ได้ข้อตกลงเช่าดาดฟ้าอย่างน้อย 3 จาก 5 อาคาร และได้รับอนุญาตทดลองบินจาก CAAT'],
+  ['ระยะที่ 2 · จุด 6–9 ฝั่งตะวันออก','2029–2031',6,9,'ผลบินทดสอบระยะ 1 ผ่านเกณฑ์ความปลอดภัย และอัตราการใช้งานเกิน 40% ติดต่อกัน 6 เดือน'],
+  ['ระยะที่ 3 · จุด 10–15 ทั้งเส้นทาง','2031–2035',10,15,'ได้ใบอนุญาตเชิงพาณิชย์ ระบบจัดการจราจรอากาศระดับต่ำพร้อม และระยะ 1–2 ทำกำไรตามเป้า']];
+ var D=[],tot=0,trev=0,mx=0;
+ PH.forEach(function(q,i){var vc=0,vr=0;VP.forEach(function(v){if(v.num>=q[2]&&v.num<=q[3]){vc+=v.capex;vr+=toll(v)*365/1e6}});
+  var cs=cc*KM[i]/KT,hard=vc+cs,soft=hard*.04,cont=(hard+soft)*.15,sum=hard+soft+cont,rev=vr+cr*KM[i]/KT;D.push({vc:vc,cs:cs,soft:soft,cont:cont,sum:sum,rev:rev,pb:sum/(rev*M.m/100)});tot+=sum;trev+=rev;mx=Math.max(mx,sum)});
+ var X=function(g){return 30+(g-100.39)/.31*580},Y=function(t){return 235-(t-13.60)/.14*205},rs='<svg viewBox="0 0 640 260">';
+ [[0,4],[4,8],[8,14]].forEach(function(r,i){var pts=CHAIN.slice(r[0],r[1]+1).map(function(c){return X(c[0]).toFixed(1)+','+Y(c[1]).toFixed(1)}).join(' ');rs+='<polyline points="'+pts+'" fill="none" stroke="'+PC[i]+'" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" opacity=".9"/>'});
+ CHAIN.forEach(function(c,i){var n=i+1,k=n<=5?0:n<=9?1:2,x=X(c[0]),y=Y(c[1]);rs+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="10" fill="'+PC[k]+'" stroke="#fff" stroke-width="2"/><text x="'+x.toFixed(1)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="middle" font-size="10" font-weight="600" fill="#fff">'+n+'</text>'});
+ [['สาทร–สีลม',X(100.52),Y(13.7230)-22],['สุขุมวิท',X(100.58),Y(13.7243)-20],['บางนา',X(100.64),Y(13.6677)-18],['สมุทรปราการ',X(100.60),Y(13.6075)+26],['พระประแดง',X(100.52),Y(13.6238)+24],['ทุ่งครุ–บางบอน',X(100.43),Y(13.6592)+26]].forEach(function(t){rs+='<text x="'+t[1].toFixed(0)+'" y="'+t[2].toFixed(0)+'" text-anchor="middle" font-size="11" fill="#64748B">'+t[0]+'</text>'});
+ rs+='</svg><div class="lg">'+PH.map(function(q,i){return '<span><i style="background:'+PC[i]+'"></i>'+q[0]+' ('+fm(KM[i],0)+' กม.)</span>'}).join('')+'</div>';
+ var gx=function(y){return 150+(y-2026)*48},gs='<svg viewBox="0 0 640 200">',yy;
+ for(yy=2026;yy<2036;yy++)gs+='<text x="'+(gx(yy)+24)+'" y="14" text-anchor="middle" font-size="10" fill="#64748B">'+yy+'</text><line x1="'+gx(yy)+'" y1="22" x2="'+gx(yy)+'" y2="190" stroke="#E2E8F0"/>';
+ [['กฎหมายและใบอนุญาต',2026,2031,'#94A3B8'],['ทดลองบิน (sandbox)',2026,2029,'#67B8C9'],['ระยะที่ 1',2027,2030,PC[0]],['ระยะที่ 2',2029,2032,PC[1]],['ระยะที่ 3',2031,2036,PC[2]]].forEach(function(r,i){var y=34+i*32;
+  gs+='<text x="8" y="'+(y+15)+'" font-size="11" fill="#0F172A">'+r[0]+'</text><rect x="'+gx(r[1])+'" y="'+y+'" width="'+(gx(r[2])-gx(r[1]))+'" height="22" rx="5" fill="'+r[3]+'"/>';
+  if(i>=2)gs+='<path d="M'+gx(r[1])+' '+(y-3)+' l6 6 l-6 6 l-6 -6z" fill="#B45309" stroke="#fff"/><text x="'+(gx(r[1])+10)+'" y="'+(y+15)+'" font-size="10" fill="#fff">ด่าน '+(i-1)+'</text>'});
+ gs+='</svg>';
+ var bars='';PH.forEach(function(q,i){var d=D[i];bars+='<div class="sb"><span style="color:'+PC[i]+';font-weight:600">ระยะ '+(i+1)+'</span><div class="bw"><div class="bar" style="width:'+(d.sum/mx*100).toFixed(1)+'%"><i style="flex:'+d.vc+';background:#1E3A5F"></i><i style="flex:'+d.cs+';background:#0E7490"></i><i style="flex:'+d.soft+';background:#94A3B8"></i><i style="flex:'+d.cont+';background:#D97706"></i></div></div><b>฿'+fm(d.sum)+' ล.</b></div>'});
+ bars+='<div class="lg"><span><i style="background:#1E3A5F"></i>ดาดฟ้าและเวอร์ติพอร์ต</span><span><i style="background:#0E7490"></i>ระบบเส้นทางและควบคุมการบิน</span><span><i style="background:#94A3B8"></i>ใบอนุญาตและชุมชน 4%</span><span><i style="background:#D97706"></i>เงินสำรอง 15%</span></div>';
+ var cards='';PH.forEach(function(q,i){var d=D[i];cards+='<div class="pc"><h4 style="color:'+PC[i]+'">'+q[0]+'</h4><small>'+q[1]+'</small><div class="kg"><div class="k"><small>งบลงทุน</small><b>฿'+fm(d.sum)+' ล้าน</b></div><div class="k"><small>รายได้ต่อปี</small><b>฿'+fm(d.rev)+' ล้าน</b></div><div class="k"><small>คืนทุนโดยประมาณ</small><b>'+fm(d.pb,1)+' ปี</b></div><div class="k"><small>ระยะทางเส้นทาง</small><b>'+fm(KM[i],1)+' กม.</b></div></div><div class="gate">◆ ด่านที่ '+(i+1)+': '+q[4]+'</div></div>'});
+ $('p2').innerHTML='<div class="pgrid"><div class="vz"><div class="ph2">แผนที่ย่อ 3 ระยะ</div>'+rs+'</div><div class="vz"><div class="ph2">ไทม์ไลน์และด่านตัดสินใจ</div>'+gs+'</div></div>'
+  +'<div class="vz"><div class="ph2">งบประมาณคาดการณ์ รวม ฿'+fm(tot)+' ล้านบาท (≈ '+fm(tot/1000,1)+' พันล้าน) · คืนทุนรวมประมาณ '+fm(tot/(trev*M.m/100),1)+' ปีหลังเปิดครบ</div>'+bars+'</div><div class="pgrid">'+cards+'</div>'
+  +'<p class="pfoot">ช่วงเวลาและตัวเลขเป็นประมาณการเบื้องต้น ปรับตามกฎหมาย เทคโนโลยี และผลทดลองบินจริง เงินลงทุนเส้นทางแบ่งตามระยะทางของแต่ละช่วง</p>';
+ /* ---- แท็บ 3 ---- */
+ var vrev=0,bidT=0;VP.forEach(function(v){vrev+=toll(v)*365/1e6});A.forEach(function(a){bidT+=res(a).bid});
+ var SG=[['จุดขึ้นลง 15 จุด',vrev,'#1E3A5F']].concat(CO.map(function(a,i){return['เส้นทางชั้น '+(i+1),toll(a)*365/1e6,['#0E7490','#1D4ED8','#7C3AED'][i]]})),TT=vrev+cr,cum=0,dn='<svg viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9155" fill="none" stroke="#E2E8F0" stroke-width="6"/>';
+ SG.forEach(function(g){var pc=g[1]/TT*100;dn+='<circle cx="21" cy="21" r="15.9155" fill="none" stroke="'+g[2]+'" stroke-width="6" stroke-dasharray="'+pc.toFixed(2)+' '+(100-pc).toFixed(2)+'" stroke-dashoffset="'+(25-cum).toFixed(2)+'"/>';cum+=pc});
+ dn+='<text x="21" y="20.5" text-anchor="middle" font-size="5.5" font-weight="600" fill="#0F172A">฿'+fm(TT/1000,2)+'</text><text x="21" y="26" text-anchor="middle" font-size="3" fill="#64748B">พันล้าน/ปี</text></svg>';
+ var dl=SG.map(function(g){return '<div class="row" style="min-width:240px"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+g[2]+';margin-right:8px"></i>'+g[0]+'</span><b>฿'+fm(g[1])+' ล. ('+fm(g[1]/TT*100,0)+'%)</b></div>'}).join('');
+ var ar='marker-end="url(#ar)"',bx=function(x,y,w,t1,t2,col){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="64" rx="8" fill="'+(col||'#fff')+'" stroke="#1E3A5F"/><text x="'+(x+w/2)+'" y="'+(y+28)+'" text-anchor="middle" font-size="12" font-weight="600" fill="'+(col?'#fff':'#0F172A')+'">'+t1+'</text><text x="'+(x+w/2)+'" y="'+(y+46)+'" text-anchor="middle" font-size="10" fill="'+(col?'#CBD5E1':'#64748B')+'">'+t2+'</text>'},
+  tx=function(x,y,t){return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="10" fill="#334155">'+t+'</text>'};
+ var fw='<svg viewBox="0 0 660 230"><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#64748B"/></marker></defs>'
+  +bx(0,60,110,'ผู้โดยสาร','และผู้ส่งพัสดุ')+bx(170,60,110,'ผู้ให้บริการ','อากาศยาน')+bx(340,60,120,'ผู้ได้รับสัมปทาน','จุดขึ้นลง + เส้นทาง','#1E3A5F')+bx(520,0,140,'เจ้าของอาคาร','ค่าเช่า + ส่วนแบ่ง 12%')+bx(520,130,140,'เจ้าของโครงการ','ค่าสัมปทานเริ่มต้น')
+  +'<line x1="112" y1="92" x2="168" y2="92" stroke="#64748B" '+ar+'/>'+tx(140,82,'ค่าโดยสาร')
+  +'<line x1="282" y1="92" x2="338" y2="92" stroke="#64748B" '+ar+'/>'+tx(310,76,'ต่อเที่ยว')+tx(310,88,'+ slot')
+  +'<line x1="462" y1="82" x2="518" y2="40" stroke="#64748B" '+ar+'/>'+tx(500,76,'12%')
+  +'<line x1="462" y1="104" x2="518" y2="150" stroke="#64748B" '+ar+'/>'+tx(484,142,'30/30/40')
+  +'<text x="0" y="14" font-size="12" font-weight="600" fill="#0F172A">เส้นทางการไหลของเงิน</text></svg>';
+ var bd=[['งวด 1 · ผ่านด่าน 1',30,PC[0]],['งวด 2 · ผ่านด่าน 2',30,PC[1]],['งวด 3 · ผ่านด่าน 3',40,PC[2]]];
+ $('p3').innerHTML='<div class="pgrid"><div class="vz"><div class="ph2">รายได้ตามโมเดลปัจจุบัน</div><div class="dn">'+dn+'<div style="flex:1">'+dl+'</div></div></div>'
+  +'<div class="vz"><div class="ph2">ค่าสัมปทานเริ่มต้นรวม ฿'+fm(bidT)+' ล้าน แบ่งจ่ายเป็น 3 งวด</div><div class="bw" style="height:34px"><div class="bar">'+bd.map(function(x){return '<i style="flex:'+x[1]+';background:'+x[2]+'"></i>'}).join('')+'</div></div><div class="lg">'+bd.map(function(x){return '<span><i style="background:'+x[2]+'"></i>'+x[0]+' '+x[1]+'% = ฿'+fm(bidT*x[1]/100)+' ล.</span>'}).join('')+'</div>'
+  +'<div class="ph2" style="margin-top:16px">วิธีชำระของผู้ใช้</div><div class="chips"><span>พร้อมเพย์</span><span>QR</span><span>บัตรเครดิต/เดบิต</span><span>กระเป๋าเงินในแอป</span><span>ตั๋วร่วมรถไฟฟ้า (อนาคต)</span></div>'
+  +'<div class="ph2" style="margin-top:16px">วิธีชำระของผู้ให้บริการอากาศยาน</div><div class="chips"><span>หลักประกันธนาคาร</span><span>ใบแจ้งหนี้รายเดือน</span><span>จ่ายล่วงหน้ารายไตรมาส (slot)</span></div></div></div>'
+  +'<div class="vz">'+fw+'</div><p class="pfoot">รูปแบบและสัดส่วนการชำระเงินเป็นข้อเสนอสำหรับเจรจา ยังไม่ใช่เงื่อนไขที่ตกลงแล้ว ส่วนแบ่งเจ้าของอาคาร 12% คิดเป็น ฿'+fm(vrev*.12)+' ล้านบาทต่อปีตามโมเดล</p>';
+ /* ---- แท็บ 4 ---- */
+ var U=[['user','ผู้โดยสาร / ผู้ส่งพัสดุ',['เลือกต้นทาง-ปลายทางจาก 15 จุด','ดูเวลา ราคา เทียบรถไฟฟ้า','ชำระด้วยพร้อมเพย์/QR','สแกน QR ที่จุดขึ้นเครื่อง']],
+  ['plane','ผู้ให้บริการอากาศยาน',['ลงทะเบียนและผ่านเกณฑ์ CAAT','ประมูลช่วงเวลาบินรายไตรมาส','จองเที่ยวและจ่ายค่าธรรมเนียม','รายงานเที่ยวบินและเหตุผิดปกติ']],
+  ['roof','เจ้าของอาคาร',['เสนอดาดฟ้าที่ให้เช่า','ตรวจโครงสร้างและความปลอดภัย','ทำสัญญาเช่าและส่วนแบ่งรายได้','รับรายงานรายได้รายเดือน']],
+  ['people','ชุมชนและหน่วยงาน',['ดูเส้นทางและแผนที่เสียงสาธารณะ','ส่งข้อร้องเรียนผ่านระบบ','ตรวจข้อมูลเที่ยวบินย้อนหลัง','รับรายงานสรุปทุกไตรมาส']]];
+ var u='';U.forEach(function(x){u+='<div class="vz"><div class="ch">'+ic(x[0])+'<h4>'+x[1]+'</h4></div><div class="fl">'+x[2].map(function(t,i){return '<div class="fs"><b>'+(i+1)+'</b><br>'+t+'</div>'}).join('')+'</div></div>'});
+ $('p4').innerHTML=u;
+}
+[].forEach.call($('ptabs').querySelectorAll('button[data-p]'),function(b){b.onclick=function(){[].forEach.call($('ptabs').querySelectorAll('button[data-p]'),function(x){x.className='';$(x.getAttribute('data-p')).hidden=(x!==b)});b.className='on'}});
+$('planBtn').onclick=function(){renderPlan();$('plan').className='on';document.body.classList.remove('oL','oR')};
+$('pcl').onclick=function(){$('plan').className=''};
+head();select(A[0].id,true);
+function start(){$('gate').style.display='none';setAttr();initMap()}
+$('go').onclick=function(){var k=$('key').value.trim();if(k){KEY=k;try{localStorage.setItem('ldk',k)}catch(e){}}else SRC='carto';start()};
+$('skip').onclick=function(){SRC='carto';start()};
+try{KEY=localStorage.getItem('ldk')||''}catch(e){}
+[].forEach.call(document.querySelectorAll('.tabs'),function(t){var bs=t.querySelectorAll('button');[].forEach.call(bs,function(b){b.onclick=function(){
+ [].forEach.call(bs,function(x){x.className='';$(x.getAttribute('data-t')).hidden=(x!==b)});b.className='on'}})});
+function h53(q){var a=0xdeadbeef,b=0x41c6ce57,c;for(var i=0;i<q.length;i++){c=q.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677)}
+ a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);return 4294967296*(2097151&b)+(a>>>0)}
+function wm(u){var t=u+' · '+new Date().toLocaleDateString(LANG==='en'?'en-GB':'th-TH')+' · '+tr('ลับเฉพาะ'),
+ v='<svg xmlns="http://www.w3.org/2000/svg" width="300" height="170"><text x="20" y="100" transform="rotate(-24 150 85)" font-size="13" fill="#0f172a" fill-opacity=".08" font-family="sans-serif">'+t+'</text></svg>';
+ $('wm').style.backgroundImage='url("data:image/svg+xml,'+encodeURIComponent(v)+'")'}
+function enter(u){CU=u;try{sessionStorage.setItem('bkk_u',u)}catch(e){}$('login').style.display='none';$('uName').textContent=u;wm(u);if(KEY)start()}
+function doLogin(){var u=$('u').value.trim();
+ if(h53('bkk|'+u+'|'+$('pw').value)===2116724418254169){enter(u)}else{$('er').textContent='ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';$('pw').value=''}}
+$('lgo').onclick=doLogin;
+[$('u'),$('pw')].forEach(function(i){i.addEventListener('keydown',function(e){if(e.key==='Enter')doLogin()})});
+$('out').onclick=function(){try{sessionStorage.removeItem('bkk_u')}catch(e){}location.reload()};
+var su=null;try{su=sessionStorage.getItem('bkk_u')}catch(e){}if(su)enter(su);
+var TR={"เส้นทางน่านฟ้าเป็นแนวสมมติ ไม่ใช่เส้นทางที่ได้รับอนุญาตจากหน่วยงานกำกับดูแล และเอกสารนี้ไม่ใช่เอกสารประกวดราคาอย่างเป็นทางการ ก่อนใช้ยื่นข้อเสนอจริงควรแทนด้วยข้อมูลจากการศึกษาของโครงการ": "Air corridor routes are hypothetical, not routes approved by any regulator, and this document is not an official tender document. Replace with project study data before submitting a real proposal.", "วาง API key ของ Longdo Map ระบบจะเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น ถ้าไม่มีหรือใช้ไม่ได้ ระบบจะใช้แผนที่สำรองให้อัตโนมัติ": "Paste your Longdo Map API key. It is stored only in this browser. If you have none or it does not work, a backup map is used automatically.", "ช่วงเวลาและตัวเลขเป็นประมาณการเบื้องต้น ปรับตามกฎหมาย เทคโนโลยี และผลทดลองบินจริง เงินลงทุนเส้นทางแบ่งตามระยะทางของแต่ละช่วง": "Timelines and figures are preliminary estimates, to be adjusted to regulation, technology and real test-flight results. Route investment is split by segment length.", "ระบบนี้เป็นเวอร์ชันสาธิต ข้อมูลทั้งหมดเป็นแบบจำลอง เอกสารและข้อมูลในระบบเป็นความลับ ห้ามเผยแพร่หรือทำซ้ำโดยไม่ได้รับอนุญาต": "This is a demo version. All data is simulated. Documents and data in this system are confidential and must not be published or copied without permission.", "รูปแบบและสัดส่วนการชำระเงินเป็นข้อเสนอสำหรับเจรจา ยังไม่ใช่เงื่อนไขที่ตกลงแล้ว ส่วนแบ่งเจ้าของอาคาร 12% คิดเป็น ฿": "Payment formats and ratios are proposals for negotiation, not agreed terms. The 12% building-owner share equals ฿", "ความจุ ค่าธรรมเนียม เงินลงทุน และมูลค่าสิทธิ์น่านฟ้า เป็นสมมติฐานเบื้องต้น ยังไม่ผ่านการศึกษาความเป็นไปได้": "Capacity, fees, investment and air-rights values are preliminary assumptions, not yet backed by a feasibility study.", "เป็นข้อเสนอเชิงนโยบาย ก่อนนำไปใช้จริงควรตรวจสอบกฎหมายและข้อกำหนดของ CAAT กับที่ปรึกษากฎหมายด้านการบิน": "Policy proposals. Before real use, verify the law and CAAT requirements with an aviation legal adviser.", "เจ้าของอาคารให้เช่าดาดฟ้าและแบ่งรายได้ตามสัญญา เส้นทางบินขออนุมัติกับ CAAT แยกต่างหาก": "Building owners lease rooftops and share revenue by contract; flight routes are approved separately by CAAT.", "ได้ใบอนุญาตเชิงพาณิชย์ ระบบจัดการจราจรอากาศระดับต่ำพร้อม และระยะ 1–2 ทำกำไรตามเป้า": "Commercial licence granted, low-altitude air traffic management ready, and Phases 1-2 meeting profit targets", "ผลบินทดสอบระยะ 1 ผ่านเกณฑ์ความปลอดภัย และอัตราการใช้งานเกิน 40% ติดต่อกัน 6 เดือน": "Phase 1 test flights pass safety criteria and utilisation exceeds 40% for 6 consecutive months", "วางเส้นเหนือแม่น้ำและถนนสายหลัก เลี่ยงบ้านพักอาศัย เปิดแผนที่เสียงให้ชุมชนดู": "Route over rivers and main roads, avoid homes, publish noise maps for communities", "ได้ข้อตกลงเช่าดาดฟ้าอย่างน้อย 3 จาก 5 อาคาร และได้รับอนุญาตทดลองบินจาก": "Rooftop lease agreements for at least 3 of 5 buildings and test-flight permission from", "หน้าต่างแสดงผลนี้ไม่รองรับ WebGL กรุณาเปิดไฟล์นี้ด้วยเบราว์เซอร์": "This window does not support WebGL. Please open this file in the browser", "โหลดไลบรารีแผนที่ไม่สำเร็จ กรุณาต่ออินเทอร์เน็ตแล้วรีเฟรชหน้านี้": "Map library failed to load. Please connect to the internet and refresh this page.", "โหลดภาพแผนที่ไม่ได้ ลองเปิดไฟล์ด้วย Chrome หรือตรวจอินเทอร์เน็ต": "Cannot load map images. Try opening in Chrome or check your internet.", "ใช้ชั้น 350 เมตรขนส่งสินค้าและช่วยเหลือฉุกเฉินก่อนรับผู้โดยสาร": "Use the 350 m tier for cargo and emergency support before carrying passengers", "วางจุดใกล้สถานี เช่น ศรีเอี่ยม ชำระผ่านพร้อมเพย์ในแอปเดียว": "Place points near stations, e.g. Si Iam; pay with PromptPay in one app", "แผนที่และอาคารสูงเป็นข้อมูลจริงจากผู้ให้บริการแผนที่และ": "Map and tall buildings are real data from map providers and", "ผู้ให้บริการประมูลสิทธิ์ใช้ช่องเวลาและเส้นทางรายไตรมาส": "Operators bid quarterly for time slots and routes", "ข้อมูลสำหรับผู้เสนอราคา เข้าถึงเฉพาะผู้ได้รับสิทธิ์": "Data for bidders, accessible only to authorised users", "ช่องทางน่านฟ้าชั้น 1 · สัญจรท้องถิ่น (จุด 1–15)": "Air corridor Tier 1 · Local commute (Points 1-15)", "ช่องทางน่านฟ้าชั้น 2 · ทางด่วน eVTOL (จุด 1–15)": "Air corridor Tier 2 · Express eVTOL (Points 1-15)", "ช่องทางน่านฟ้าชั้น 3 · ขนส่งสินค้า (จุด 1–15)": "Air corridor Tier 3 · Cargo (Points 1-15)", "ลงทุนระยะถัดไปเมื่อระยะก่อนผ่านเกณฑ์ที่ตกลงกัน": "Invest in the next phase only when the previous phase meets agreed criteria", "แพลตฟอร์มข้อมูลสัมปทานน่านฟ้าและเวอร์ติพอร์ต": "Air-space and vertiport concession data platform", "แบบจำลองผลตอบแทนและค่าสัมปทานเสนอเริ่มต้น": "Return model and initial concession fee estimate", "แผนที่สามมิติ ย่านสาทร สีลม และสุขุมวิท": "3D map of Sathorn, Silom and Sukhumvit", "ตึกจำลองสัมปทาน + ปริมาตรสิทธิ์น่านฟ้า": "Concession building models + air-rights volume", "สาทร–สุขุมวิท–พระประแดง–ทุ่งครุ–บางบอน": "Sathorn–Sukhumvit–Phra Pradaeng–Thung Khru–Bang Bon", "สำหรับผู้ได้รับเชิญเข้าชมข้อมูลโครงการ": "For invited viewers of project data", "ผู้ลงทุนเสี่ยงน้อยลง ถอนตัวได้ทุกด่าน": "Lower investor risk; can exit at every gate", "อาคารสถานีศรีเอี่ยม (MRT สายสีเหลือง)": "Si Iam Station Building (MRT Yellow Line)", "ค่าสัมปทานเสนอเริ่มต้น (25% ของ NPV)": "Suggested initial concession fee (25% of NPV)", "ขออนุญาตง่าย สร้างสถิติความปลอดภัย": "Easier to permit; builds a safety record", "คิง เพาเวอร์ มหานคร (Sathorn Hub)": "King Power Mahanakhon (Sathorn Hub)", "ระยะที่ 3 · จุด 10–15 ทั้งเส้นทาง": "Phase 3 · Points 10-15 full route", "อัตราการใช้งานเทียบกับกำลังรองรับ": "Utilisation vs. capacity", "ค่าสัมปทานเสนอเริ่มต้น (ล้านบาท)": "Suggested initial concession fee (M THB)", "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง": "Incorrect username or password", "ที่มาและความน่าเชื่อถือของตัวเลข": "Source and reliability of figures", "ระยะที่ 2 · จุด 6–9 ฝั่งตะวันออก": "Phase 2 · Points 6-9 east side", "ระยะที่ 1 · จุด 1–5 ใจกลางเมือง": "Phase 1 · Points 1-5 city centre", "รายได้ล่วงหน้า โปร่งใส วัดผลได้": "Upfront revenue; transparent; measurable", "วิธีชำระของผู้ให้บริการอากาศยาน": "Payment methods for aircraft operators", "ดูเส้นทางและแผนที่เสียงสาธารณะ": "View routes and the public noise map", "ผลตอบแทนสัมปทาน (EBITDA/ลงทุน)": "Concession yield (EBITDA / investment)", "เริ่มจากพัสดุ เวชภัณฑ์ ฉุกเฉิน": "Start with parcels, medical supplies, emergencies", "ชั้น 1 · 120 ม. สัญจรท้องถิ่น": "Tier 1 · 120 m local commute", "รายงานเที่ยวบินและเหตุผิดปกติ": "Report flights and incidents", "เลือกต้นทาง-ปลายทางจาก 15 จุด": "Choose origin and destination from 15 points", "จองเที่ยวและจ่ายค่าธรรมเนียม": "Book trips and pay fees", "จ่ายล่วงหน้ารายไตรมาส (slot)": "Prepay quarterly (slot)", "ทำสัญญาเช่าและส่วนแบ่งรายได้": "Sign lease and revenue-share contract", "มูลค่าสิทธิ์น่านฟ้า (ประมาณ)": "Air-rights value (estimate)", "รายได้ค่าผ่านทางต่อวัน (บาท)": "Daily toll revenue (THB)", "และเวอร์ติพอร์ตกรุงเทพมหานคร": "and Bangkok vertiports", "ชั้น 3 · 350 ม. ขนส่งสินค้า": "Tier 3 · 350 m cargo", "ตรวจข้อมูลเที่ยวบินย้อนหลัง": "Audit past flight data", "ตรวจโครงสร้างและความปลอดภัย": "Inspect structure and safety", "รายได้ค่าผ่านทางรวม (ต่อปี)": "Total toll revenue (per year)", "ข้อมูล (สมมติฐานเบื้องต้น)": "Data (preliminary assumptions)", "ประมูลช่วงเวลาบินรายไตรมาส": "Bid quarterly for flight time slots", "พันล้าน) · คืนทุนรวมประมาณ": "bn) · overall payback about", "ระบบเส้นทางและควบคุมการบิน": "Route and flight-control systems", "อัตราผลตอบแทนโครงการ (IRR)": "Project internal rate of return (IRR)", "แบ่ง 3 ระยะ มีด่านตัดสินใจ": "Three phases with decision gates", "ทำได้ภายใต้กฎหมายปัจจุบัน": "Feasible under current law", "มูลค่าปัจจุบันสุทธิ (NPV)": "Net present value (NPV)", "สแกน QR ที่จุดขึ้นเครื่อง": "Scan QR at the boarding point", "เงินลงทุนโครงการ (ประมาณ)": "Project investment (estimate)", "ความสูงอาคาร (โดยประมาณ)": "Building height (approx.)", "ดูเวลา ราคา เทียบรถไฟฟ้า": "See time and price; compare with the train", "ทุ่งครุ (ถนนกาญจนาภิเษก)": "Thung Khru (Kanchanaphisek Rd.)", "ประมูลช่วงเวลาบิน (slot)": "Flight time-slot auction", "ระบบข้อมูลสัมปทานน่านฟ้า": "Air-space concession data system", "สัมปทานจุดขึ้นลงบนดาดฟ้า": "Rooftop take-off and landing point concession", "เริ่มแผนที่ 3D ไม่สำเร็จ": "Failed to start the 3D map", "การเติบโตของรายได้ต่อปี": "Annual revenue growth", "ค่าสัมปทานเริ่มต้นรวม ฿": "Total initial concession fee ฿", "ชั้น 2 · 220 ม. ทางด่วน": "Tier 2 · 220 m express", "ตั๋วร่วมรถไฟฟ้า (อนาคต)": "Joint train ticket (future)", "บางครุ (ถนนกาญจนาภิเษก)": "Bang Khru (Kanchanaphisek Rd.)", "ผู้โดยสาร / ผู้ส่งพัสดุ": "Passengers / parcel senders", "รับรายงานรายได้รายเดือน": "Receive monthly revenue reports", "ล้าน แบ่งจ่ายเป็น 3 งวด": "M, paid in 3 installments", "สินทรัพย์เปิดรับข้อเสนอ": "Assets open for proposals", "ส่งข้อร้องเรียนผ่านระบบ": "Submit complaints through the system", "ไทม์ไลน์และด่านตัดสินใจ": "Timeline and decision gates", "งบประมาณคาดการณ์ รวม ฿": "Estimated budget, total ฿", "ชั่วโมงให้บริการต่อวัน": "Service hours per day", "บินตามแม่น้ำและถนนใหญ่": "Fly along rivers and main roads", "บ้านคลองบางแก้ว บางพลี": "Ban Khlong Bang Kaeo, Bang Phli", "รับรายงานสรุปทุกไตรมาส": "Receive quarterly summary reports", "รายได้ค่าผ่านทางต่อวัน": "Daily toll revenue", "รายได้ตามโมเดลปัจจุบัน": "Revenue per current model", "ลดเสียงและข้อร้องเรียน": "Less noise and fewer complaints", "ข้าม (ใช้แผนที่สำรอง)": "Skip (use backup map)", "ค่าธรรมเนียมต่อเที่ยว": "Fee per movement", "ดาดฟ้าและเวอร์ติพอร์ต": "Rooftops and vertiports", "ลงทะเบียนและผ่านเกณฑ์": "Register and pass criteria", "บางเมือง สมุทรปราการ": "Bang Mueang, Samut Prakan", "ผู้ให้บริการอากาศยาน": "Aircraft operators", "รายได้และการชำระเงิน": "Revenue and payments", "ล้านบาทต่อปีตามโมเดล": "M THB per year per the model", "เสนอดาดฟ้าที่ให้เช่า": "Offer rooftops for lease", "เส้นทางการไหลของเงิน": "Flow of money", "ความจุ (เที่ยว/ชม.)": "Capacity (movements/hr)", "ความจุจุดจอด-ขึ้นลง": "Landing/take-off capacity", "จุดขึ้นลง + เส้นทาง": "Points + routes", "ระดับความสูงชั้นบิน": "Flight tier altitude", "รายละเอียดสินทรัพย์": "Asset details", "เงินลงทุน (ล้านบาท)": "Investment (M THB)", "ใช้ง่าย สังคมยอมรับ": "Easy to use; socially accepted", "ค่าสัมปทานเริ่มต้น": "Initial concession fee", "ค่าเช่า + ส่วนแบ่ง": "Rent + share", "ชั้นข้อมูลบนแผนที่": "Map layers", "ทดลองบิน (sandbox)": "Test flights (sandbox)", "ศึกษาความเป็นไปได้": "Feasibility study", "ใบแจ้งหนี้รายเดือน": "Monthly invoice", "กฎหมายและใบอนุญาต": "Law and licensing", "ชำระด้วยพร้อมเพย์": "Pay by PromptPay", "วิธีชำระของผู้ใช้": "User payment methods", "เอ็มไพร์ ทาวเวอร์": "Empire Tower", "กระเป๋าเงินในแอป": "In-app wallet", "งวด 1 · ผ่านด่าน": "Installment 1 · after Gate", "งวด 2 · ผ่านด่าน": "Installment 2 · after Gate", "งวด 3 · ผ่านด่าน": "Installment 3 · after Gate", "จุดขึ้นลง 15 จุด": "15 take-off/landing points", "ชั่วโมงให้บริการ": "Service hours", "ชุมชนและหน่วยงาน": "Communities and agencies", "บัตรเครดิต/เดบิต": "Credit/debit card", "ผู้ได้รับสัมปทาน": "Concessionaire", "หลักประกันธนาคาร": "Bank guarantee", "เชื่อมกับรถไฟฟ้า": "Connect with the train", "เปิดตำแหน่งนี้ใน": "Open this location in", "แผนที่ย่อ 3 ระยะ": "Overview map of 3 phases", "ใบอนุญาตและชุมชน": "Licences and community", "คืนทุนโดยประมาณ": "Estimated payback", "ระยะและงบประมาณ": "Phases and budget", "รายการสินทรัพย์": "Asset list", "เกินอายุสัมปทาน": "Beyond concession term", "เจรจาผู้ร่วมทุน": "Partner negotiation", "แบบจำลองการเงิน": "Financial model", "ความยาวเส้นทาง": "Route length", "ช่องทางน่านฟ้า": "Air corridor", "ทุ่งครุ–บางบอน": "Thung Khru–Bang Bon", "ระยะทางเส้นทาง": "Route distance", "ระยะเวลาคืนทุน": "Payback period", "เจ้าของโครงการ": "Project owner", "เปิดรับข้อเสนอ": "Open for proposals", "และผู้ส่งพัสดุ": "and parcel senders", "ปีหลังเปิดครบ": "yrs after full opening", "ผู้ถือสัมปทาน": "Concession holder", "สุขุมวิท 101)": "Sukhumvit 101)", "ผู้ให้บริการ": "Operator", "มุมมองแผนที่": "Map view", "รายได้ต่อวัน": "Daily revenue", "เจ้าของอาคาร": "Building owner", "เวอร์ติพอร์ต": "Vertiport", "แผนที่สำรอง)": "backup map)", "ทั้งเส้นทาง": "Full route", "ที่มาข้อมูล": "Data sources", "พิมพ์รายงาน": "Print report", "ย่านพื้นที่": "Area", "สมุทรปราการ": "Samut Prakan", "รายได้ต่อปี": "Annual revenue", "อัตราใช้งาน": "Utilisation", "อายุสัมปทาน": "Concession term", "เข้าสู่ระบบ": "Sign in", "เริ่มใช้งาน": "Get started", "เส้นทางชั้น": "Route tier", "ชื่อผู้ใช้": "Username", "พร้อมพงษ์)": "Phrom Phong)", "พันล้าน/ปี": "bn/yr", "วิธีใช้งาน": "How to use", "ออกจากระบบ": "Sign out", "อัตราคิดลด": "Discount rate", "เที่ยว/ชม.": "movements/hr", "แนวคิดหลัก": "Key concepts", "แผนโครงการ": "Project plan", "ค่าโดยสาร": "Fare", "ต่อเที่ยว": "per trip", "ผู้โดยสาร": "Passengers", "ผู้ใช้งาน": "User", "พระประแดง": "Phra Pradaeng", "พร้อมเพย์": "PromptPay", "สาทร–สีลม": "Sathorn–Silom", "อัตรากำไร EBITDA": "EBITDA margin", "เงินสำรอง": "Contingency", "เชื่อมต่อ": "Connect", "โฟกัสย่าน": "Focus area", "รหัสผ่าน": "Password", "ลับเฉพาะ": "Confidential", "ล้านบาท)": "M THB)", "สุขุมวิท": "Sukhumvit", "อากาศยาน": "Aircraft", "การเงิน": "Finance", "งบลงทุน": "Investment budget", "ด่านที่": "Gate", "ทองหล่อ": "Thong Lo", "ทุ่งครุ": "Thung Khru", "พระโขนง": "Phra Khanong", "พันล้านบาท": "bn THB", "พันล้าน": "bn", "ระยะที่": "Phase", "ล้านบาท": "M THB", "ความจุ": "Capacity", "จอมทอง": "Chom Thong", "บางบอน": "Bang Bon", "บางพลี": "Bang Phli", "ประเภท": "Type", "ภาพรวม": "Overview", "มุมมอง": "View", "รายการ": "items", "ส่งออก": "Export", "เอกมัย": "Ekkamai", "แผนที่": "Map", "บางนา": "Bang Na", "มุมบน": "top-down", "/ลบ.ม.": "/m³", "ลบ.ม.": "m³", "สถานะ": "Status", "เพิ่ม": "Increase", "เอียง": "tilted", "กม.)": "km)", "กม.": "km", "ชื่อ": "Name", "ด่าน": "Gate", "ย่าน": "Area", "รหัส": "Code", "ระยะ": "Phase", "ล้าน": "M", "สาทร": "Sathorn", "แท็บ": "tab", "จาก": "of", "จุด 1–15": "Points 1-15", "จุด 6–15": "Points 6-15", "จุด 1–5": "Points 1-5", "จุด": "Point", "ชม.": "h", "ปิด": "Close", "วาง": "Paste", "ปี": "yrs", "ม.": "m", "ล.": "M", "ลด": "Decrease"};
+var CU,LANG='th',ORIG=new WeakMap(),TRANS=new WeakMap(),busy=false,TRK=Object.keys(TR).sort(function(a,b){return b.length-a.length}),THR=/[\u0E00-\u0E7F]/,OTITLE=document.title;
+try{LANG=localStorage.getItem('bkk_lang')||'th'}catch(e){}
+function tr(x){if(LANG!=='en'||!x)return x;TRK.forEach(function(k){if(x.indexOf(k)>-1)x=x.split(k).join(TR[k])});return x}
+function applyNode(n){var o=n.nodeValue;if(ORIG.has(n)){if(TRANS.get(n)===o)o=ORIG.get(n);else ORIG.set(n,o)}
+ if(!THR.test(o))return;ORIG.set(n,o);var v=LANG==='en'?tr(o):o;TRANS.set(n,v);if(n.nodeValue!==v)n.nodeValue=v}
+function applyAttrs(root){var els=root.querySelectorAll?[].slice.call(root.querySelectorAll('[placeholder],[aria-label]')):[];if(root.hasAttribute&&(root.hasAttribute('placeholder')||root.hasAttribute('aria-label')))els.push(root);
+ els.forEach(function(el){el.__o=el.__o||{};['placeholder','aria-label'].forEach(function(a){if(!el.hasAttribute(a))return;if(el.__o[a]===undefined)el.__o[a]=el.getAttribute(a);if(THR.test(el.__o[a]))el.setAttribute(a,LANG==='en'?tr(el.__o[a]):el.__o[a])})})}
+function walkT(root){var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){var p=n.parentNode&&n.parentNode.nodeName;return(p==='SCRIPT'||p==='STYLE')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}}),n;while((n=w.nextNode()))applyNode(n)}
+function applyAll(){busy=true;walkT(document.body);applyAttrs(document.body);document.title=LANG==='en'?tr(OTITLE):OTITLE;document.documentElement.lang=LANG;busy=false;obs.takeRecords()}
+var obs=new MutationObserver(function(ms){if(busy||LANG!=='en')return;busy=true;
+ ms.forEach(function(m){if(m.type==='characterData'){if(m.target.nodeType===3)applyNode(m.target)}else[].forEach.call(m.addedNodes,function(nd){if(nd.nodeType===3)applyNode(nd);else if(nd.nodeType===1){walkT(nd);applyAttrs(nd)}})});
+ busy=false;obs.takeRecords()});
+obs.observe(document.body,{childList:true,subtree:true,characterData:true});
+function setLang(l){LANG=l;try{localStorage.setItem('bkk_lang',l)}catch(e){}
+ [].forEach.call(document.querySelectorAll('.lang button'),function(b){b.className=(b.getAttribute('data-l')===l)?'on':''});
+ applyAll();if(CU)wm(CU)}
+[].forEach.call(document.querySelectorAll('.lang button'),function(b){b.onclick=function(){setLang(b.getAttribute('data-l'))}});
+if(LANG==='en')setLang('en');
+})();
+</script>
+</body>
+</html>
